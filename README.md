@@ -12,7 +12,7 @@ import { HorizonSdkView } from "react-native-horizon-sdk";
 
 // ...
 
-<HorizonSdkView color="tomato" />
+<HorizonSdkView />
 ```
 
 ## Contributing

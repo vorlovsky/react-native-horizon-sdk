@@ -1,4 +1,4 @@
-package com.example.reactnativehorizonsdk.newarchitecture.components;
+package com.hvt.petrakeas.simpleapp.newarchitecture.components;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;

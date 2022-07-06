@@ -1,4 +1,4 @@
-package com.example.reactnativehorizonsdk;
+package com.hvt.petrakeas.simpleapp;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

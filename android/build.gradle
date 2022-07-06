@@ -123,8 +123,10 @@ repositories {
 
 
 dependencies {
+  implementation fileTree(dir: "libs", include: ["*.aar"])
+  implementation 'com.google.guava:guava:30.1-android'
     //noinspection GradleDynamicVersion
-  implementation "com.facebook.react:react-native:+"
+  implementation "com.facebook.react:react-native:+"  
 // From node_modules
 }
 

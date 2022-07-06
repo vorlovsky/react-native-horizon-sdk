@@ -1,6 +1,6 @@
 {
   "name": "react-native-horizon-sdk",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "test",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -28,7 +28,7 @@
     "prepare": "bob build",
     "release": "release-it",
     "example": "yarn --cwd example",
-    "pods": "cd example && RCT_NEW_ARCH_ENABLED=0 pod-install --quiet",
+    "pods": "cd example && set RCT_NEW_ARCH_ENABLED=0 pod-install --quiet",
     "bootstrap": "yarn example && yarn && yarn pods"
   },
   "keywords": [
@@ -37,7 +37,7 @@
     "android"
   ],
   "repository": "https://github.com/vorlovsky/react-native-horizon-sdk",
-  "author": "vorlovsky <vyacheslav_olovsky@hotmail.com> (https://github.con/vorlovsky/)",
+  "author": "vorlovsky <vyacheslav_orlovsky@hotmail.com> (https://github.com/vorlovsky/)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/vorlovsky/react-native-horizon-sdk/issues"
@@ -66,14 +66,16 @@
     "react-native": "0.68.2",
     "react-native-builder-bob": "^0.18.2",
     "release-it": "^15.0.0",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "react-native-permissions": "^3.4.0"
   },
   "resolutions": {
     "@types/react": "17.0.21"
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-permissions": "*"
   },
   "jest": {
     "preset": "react-native",
@@ -148,5 +150,8 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "react-native-fs": "^2.20.0"
   }
 }

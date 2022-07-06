@@ -1,26 +1,15 @@
-import {
-  requireNativeComponent,
-  UIManager,
-  Platform,
-  ViewStyle,
-} from 'react-native';
+import { NativeModules } from 'react-native';
+import { LINKING_ERROR } from './constants';
 
-const LINKING_ERROR =
-  `The package 'react-native-horizon-sdk' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ ios: "- You have run 'pod install'\n", default: '' }) +
-  '- You rebuilt the app after installing the package\n' +
-  '- You are not using Expo managed workflow\n';
+export const HorizonSdk = NativeModules.HorizonSdk
+  ? NativeModules.HorizonSdk
+  : new Proxy(
+      {},
+      {
+        get() {
+          throw new Error(LINKING_ERROR);
+        },
+      }
+    );
 
-type HorizonSdkProps = {
-  color: string;
-  style: ViewStyle;
-};
-
-const ComponentName = 'HorizonSdkView';
-
-export const HorizonSdkView =
-  UIManager.getViewManagerConfig(ComponentName) != null
-    ? requireNativeComponent<HorizonSdkProps>(ComponentName)
-    : () => {
-        throw new Error(LINKING_ERROR);
-      };
+export { HorizonSdkView } from './components/HorizonSdkView';
