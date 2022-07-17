@@ -14,7 +14,6 @@ import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.util.RNLog;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -35,15 +34,23 @@ import com.hvt.horizonSDK.Size;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import android.util.Log;
 
 public class HorizonSdkViewManager extends SimpleViewManager<View> {
     public static final String REACT_CLASS = "HorizonSdkView";
 
+    private static final String TAG = "ReactNativeJS";
+
     private static final String COMMAND_START_RECORDING = "startRecording";
     private static final String COMMAND_STOP_RECORDING = "stopRecording";
 
+    private static final String CALLBACK_ON_FAILED_TO_START = "onFailedToStart";
+    private static final String CALLBACK_ON_STARTED_RUNNING = "onStartedRunning";
+    private static final String CALLBACK_ON_STOPPED_RUNNING = "onStoppedRunning";
     private static final String CALLBACK_ON_RECORDING_STARTED = "onRecordingStarted";
     private static final String CALLBACK_ON_RECORDING_FINISHED = "onRecordingFinished";
+    private static final String CALLBACK_ON_PHOTO_CAPTURED = "onPhotoCaptured";
+    private static final String CALLBACK_ON_SNAPSHOT_CAPTURED = "onSnapshotCaptured";
 
     private HVTView mCameraPreview;
     private HVTCamera mHVTCamera;
@@ -116,12 +123,32 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
     public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
         return MapBuilder.<String, Object>builder()
         .put(
+            CameraListener.EVENT_FAILED_TO_START,
+            MapBuilder.of("registrationName", CALLBACK_ON_FAILED_TO_START)
+        )
+        .put(
+            CameraListener.EVENT_STARTED_RUNNING,
+            MapBuilder.of("registrationName", CALLBACK_ON_STARTED_RUNNING)
+        )
+        .put(
+            CameraListener.EVENT_STOPPED_RUNNING,
+            MapBuilder.of("registrationName", CALLBACK_ON_STOPPED_RUNNING)
+        )
+        .put(
             CameraListener.EVENT_RECORDING_STARTED,
             MapBuilder.of("registrationName", CALLBACK_ON_RECORDING_STARTED)
         )
         .put(
             CameraListener.EVENT_RECORDING_FINISHED,
             MapBuilder.of("registrationName", CALLBACK_ON_RECORDING_FINISHED)
+        )
+        .put(
+            CameraListener.EVENT_PHOTO_CAPTURED,
+            MapBuilder.of("registrationName", CALLBACK_ON_PHOTO_CAPTURED)
+        )
+        .put(
+            CameraListener.EVENT_SNAPSHOT_CAPTURED,
+            MapBuilder.of("registrationName", CALLBACK_ON_SNAPSHOT_CAPTURED)
         ).build();
     }
 
@@ -131,13 +158,22 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
     // }
 
     private class CameraListener implements HVTCameraListener {
+        public static final String EVENT_FAILED_TO_START = "failedToStart";
+        public static final String EVENT_STARTED_RUNNING = "startedRunning";
+        public static final String EVENT_STOPPED_RUNNING = "stoppedRunning";
         public static final String EVENT_RECORDING_STARTED = "recordingStarted";
         public static final String EVENT_RECORDING_FINISHED = "recordingFinished";
+        public static final String EVENT_PHOTO_CAPTURED = "photoCaptured";
+        public static final String EVENT_SNAPSHOT_CAPTURED = "snapshotCaptured";
 
         private View view;
 
         public CameraListener(View cameraView) {
             this.view = cameraView;
+        }
+
+        private void dispatchEvent(String eventName) {
+            dispatchEvent(eventName, null);
         }
 
         private void dispatchEvent(String eventName, @Nullable WritableMap event) {
@@ -147,39 +183,47 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
         }
 
         @Override
-        public void onFailedToStart() {                     
+        public void onFailedToStart() {
+            Log.i(TAG, "onFailedToStart");
+            dispatchEvent(EVENT_FAILED_TO_START);
         }
 
         @Override
         public void onStartedRunning(Camera.Parameters parameters, int i) {
+            Log.i(TAG, "onStartedRunning");
+            dispatchEvent(EVENT_STARTED_RUNNING);
         }
 
         @Override
         public void onPreviewHasBeenRunning(Camera.Parameters parameters, int i) {
+            Log.i(TAG, "onPreviewHasBeenRunning");  
         }
 
         @Override
         public void onWillStopRunning() {
-
+            Log.i(TAG, "onWillStopRunning");
         }
 
         @Override
         public void onStoppedRunning() {
-
+            Log.i(TAG, "onStoppedRunning");
+            dispatchEvent(EVENT_STOPPED_RUNNING);
         }
 
         @Override
         public void onRecordingHasStarted() {
-            dispatchEvent(EVENT_RECORDING_STARTED, null);
+            Log.i(TAG, "onRecordingHasStarted");
+            dispatchEvent(EVENT_RECORDING_STARTED);
         }
 
         @Override
         public void onRecordingWillStop() {
-
+            Log.i(TAG, "onRecordingWillStop");
         }
 
         @Override
-        public void onRecordingFinished(File file, boolean success) {            
+        public void onRecordingFinished(File file, boolean success) {   
+            Log.i(TAG, "onRecordingFinished "+file.getAbsolutePath()+" "+success);         
             WritableMap event = Arguments.createMap();
             event.putString("path", file.getAbsolutePath());
             event.putBoolean("success", success);
@@ -188,10 +232,19 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
 
         @Override
         public void onPhotoCaptured(File file, boolean success) {
+            Log.i(TAG, "onPhotoCaptured "+file.getAbsolutePath()+" "+success);         
+            WritableMap event = Arguments.createMap();
+            event.putString("path", file.getAbsolutePath());
+            event.putBoolean("success", success);
+            dispatchEvent(EVENT_PHOTO_CAPTURED, event);
         }
 
         @Override
         public void onSnapshotCaptured(File file) {
+            Log.i(TAG, "onSnapshotCaptured "+file.getAbsolutePath());         
+            WritableMap event = Arguments.createMap();
+            event.putString("path", file.getAbsolutePath());
+            dispatchEvent(EVENT_SNAPSHOT_CAPTURED, event);
         }
 
         @Override

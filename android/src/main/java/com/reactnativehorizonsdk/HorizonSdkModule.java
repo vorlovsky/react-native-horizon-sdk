@@ -1,5 +1,6 @@
 package com.reactnativehorizonsdk;
 
+import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.Promise;
@@ -34,7 +35,6 @@ public class HorizonSdkModule extends ReactContextBaseJavaModule {
             initialized = true;
         }
 
-        promise.resolve("HorizonSDK initialized");
+        promise.resolve(initialized);
     }
-
 }

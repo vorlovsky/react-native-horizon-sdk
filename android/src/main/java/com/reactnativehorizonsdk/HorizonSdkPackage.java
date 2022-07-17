@@ -13,8 +13,9 @@ import java.util.List;
 public class HorizonSdkPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        List<NativeModule> modules = new ArrayList<>();
-        modules.add(new HorizonSdkModule(reactContext));
+        List<NativeModule> modules = new ArrayList<>();        
+        modules.add(new HorizonSdkModule(reactContext));   
+        modules.add(new CameraHelperModule(reactContext));     
         return modules;
     }
 
