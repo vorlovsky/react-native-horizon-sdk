@@ -72,33 +72,11 @@ export class HorizonSdkView extends React.PureComponent {
     callViewMethod(this.viewRef, 'stopRecording');
   }
 
-  _onRecordingStarted = () => {
-    console.log('onRecordingStarted');
-
-    const { onRecordingStarted } = this.props;
-
-    !!onRecordingStarted && onRecordingStarted();
-  };
-
-  _onRecordingFinished = (event) => {
-    console.log('onRecordingFinished');
-    console.log(event.nativeEvent);
-
-    const { onRecordingFinished } = this.props;
-
-    !!onRecordingFinished && onRecordingFinished(event);
-  };
-
   render() {
     const { permissionsGranted } = this.state;
 
     return permissionsGranted ? (
-      <HorizonSdkViewNative
-        {...this.props}
-        ref={this.viewRef}
-        onRecordingStarted={this._onRecordingStarted}
-        onRecordingFinished={this._onRecordingFinished}
-      />
+      <HorizonSdkViewNative {...this.props} ref={this.viewRef} />
     ) : (
       <View {...this.props} />
     );
