@@ -27,16 +27,20 @@ public class CameraHelperModule extends ReactContextBaseJavaModule {
 
     private CameraHelper mCameraHelper;
 
+    protected CameraHelper getCameraHelper() {
+        if(mCameraHelper == null) {
+            try {
+                mCameraHelper = new CameraHelper();
+            } catch (IOException e) {
+                Log.e("HorizonSDK error", "Unable to create CameraHelper instance");
+            }
+        }
+
+        return mCameraHelper;
+    }
+
     public CameraHelperModule(ReactApplicationContext reactContext) {
         super(reactContext);
-
-        try {
-            mCameraHelper = new CameraHelper();
-        } catch (IOException e) {
-            Log.e("HorizonSDK error", "Unable to create CameraHelper instance");
-
-            return;
-        }
     }
 
     @Override
@@ -47,14 +51,14 @@ public class CameraHelperModule extends ReactContextBaseJavaModule {
     
     @ReactMethod
     public void hasCamera(int cameraFacing, Promise promise) {
-        boolean status = mCameraHelper.hasCamera(cameraFacing);
+        boolean status = getCameraHelper().hasCamera(cameraFacing);
 
         promise.resolve(status);
     }
 
     @ReactMethod
     public void getSupportedVideoSize(int cameraFacing, Promise promise) {
-        List<Size> sizeList = mCameraHelper.getSupportedVideoSize(cameraFacing);
+        List<Size> sizeList = getCameraHelper().getSupportedVideoSize(cameraFacing);
 
         WritableArray array = new WritableNativeArray();
         for (Size size : sizeList) {
@@ -70,7 +74,7 @@ public class CameraHelperModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getSupportedFlashModes(int cameraFacing, Promise promise) {
-        List<String> modesList = mCameraHelper.getSupportedFlashModes(cameraFacing);
+        List<String> modesList = getCameraHelper().getSupportedFlashModes(cameraFacing);
 
         promise.resolve(Arguments.fromList(modesList));
     }
