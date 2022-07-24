@@ -34,13 +34,18 @@ import com.hvt.horizonSDK.Size;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import android.util.Log;
+import java.util.List;
 
 public class HorizonSdkViewManager extends SimpleViewManager<View> {
     public static final String REACT_CLASS = "HorizonSdkView";
 
-    private static final String TAG = "ReactNativeJS";
+    private static final String TAG = "ReactNative";
 
+    private static final String COMMAND_START_RUNNING = "startRunning";
+    private static final String COMMAND_STOP_RUNNING = "stopRunning";
+    // private static final String COMMAND_SET_CAMERA_MODE = "setCameraMode";
+    private static final String COMMAND_SET_CAMERA = "setCamera";
+    // private static final String COMMAND_SET_SCREEN_ROTATION = "setScreenRotation";
     private static final String COMMAND_START_RECORDING = "startRecording";
     private static final String COMMAND_STOP_RECORDING = "stopRecording";
 
@@ -52,8 +57,8 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
     private static final String CALLBACK_ON_PHOTO_CAPTURED = "onPhotoCaptured";
     private static final String CALLBACK_ON_SNAPSHOT_CAPTURED = "onSnapshotCaptured";
 
-    private HVTView mCameraPreview;
     private HVTCamera mHVTCamera;
+    private HVTView mCameraPreview;
     private CameraHelper mCameraHelper;
 
     private File mVideoFile;
@@ -67,34 +72,139 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
     @Override
     @NonNull
     public View createViewInstance(ThemedReactContext reactContext) {
-        Log.w(REACT_CLASS, "createViewInstance");
-        mHVTCamera = new HVTCamera(reactContext);        
-        //int activityRotation = ((WindowManager) reactContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-        mHVTCamera.setScreenRotation(Surface.ROTATION_0);
+        Log.w(TAG, "createViewInstance");
 
-        mCameraPreview = new HVTView(reactContext);
-        mHVTCamera.attachPreviewView(mCameraPreview);
-
-        mHVTCamera.setListener(new CameraListener(mCameraPreview));
-
-        try {
-            mCameraHelper = new CameraHelper();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(mHVTCamera == null) {
+            mHVTCamera = new HVTCamera(reactContext);        
+            mHVTCamera.setScreenRotation(Surface.ROTATION_0);
+            mHVTCamera.setCameraMode(HVTVars.CameraMode.AUTO);
+            
+            try {
+                mCameraHelper = new CameraHelper();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            int facing = mCameraHelper.hasCamera(Camera.CameraInfo.CAMERA_FACING_BACK) ?
+                    Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
+            Size[] sizes = mCameraHelper.getDefaultVideoAndPhotoSize(facing);
+            mHVTCamera.setCamera(facing, sizes[0], sizes[1]);
         }
-        int facing = mCameraHelper.hasCamera(Camera.CameraInfo.CAMERA_FACING_BACK) ?
-                Camera.CameraInfo.CAMERA_FACING_BACK : Camera.CameraInfo.CAMERA_FACING_FRONT;
-        Size[] sizes = mCameraHelper.getDefaultVideoAndPhotoSize(facing);
-        mHVTCamera.setCamera(facing, sizes[0], sizes[1]);
 
-        mHVTCamera.startRunning();
+        if(mCameraPreview == null) {
+            mCameraPreview = new HVTView(reactContext);
+
+            mHVTCamera.attachPreviewView(mCameraPreview);
+            mHVTCamera.setListener(new CameraListener(mCameraPreview));
+            // mHVTCamera.startRunning();
+        }
 
         return mCameraPreview;
     }
 
     @Override
+    public void onDropViewInstance(@NonNull View view) {
+        if(view != mCameraPreview) {
+            return;
+        }
+
+        // mHVTCamera.stopRunning();
+        mHVTCamera.detachPreviewView(mCameraPreview);
+        mHVTCamera.setListener(null);
+
+        mCameraPreview = null;
+
+        mHVTCamera.destroy();
+        mHVTCamera = null;
+    }
+
+    @ReactProp(name = "cameraMode")
+    public void setCameraMode(View view, String modeName) {
+        mHVTCamera.setCameraMode(HVTVars.CameraMode.valueOf(modeName));
+    }
+
+    @ReactProp(name = "screenRotation")
+    public void setScreenRotation(View view, int rotation) {
+        mHVTCamera.setScreenRotation(rotation);
+    }
+
+    @ReactProp(name = "previewDisabled")
+    public void setPreviewDisabled(View view, boolean status) {
+        mCameraPreview.setEnabled(!status);
+    }
+
+    @ReactProp(name = "tapToFocus")
+    public void setTapToFocus(View view, boolean status) {
+        mCameraPreview.setTapToFocus(status);
+    }
+
+    @Override
     public void receiveCommand(@NonNull View root, String commandId, @Nullable ReadableArray args) {
         switch(commandId) {
+            case COMMAND_START_RUNNING:
+                if(!mHVTCamera.isRunning()) {
+                    mHVTCamera.startRunning();
+                }
+                break;
+
+            case COMMAND_STOP_RUNNING:
+                if(mHVTCamera.isRunning()) {
+                    mHVTCamera.stopRunning();
+                }
+                break;
+
+            // case COMMAND_SET_SCREEN_ROTATION:
+            //     int rotation = args.getInt(0);
+            //     mHVTCamera.setScreenRotation(rotation);
+            //     break;
+
+            // case COMMAND_SET_CAMERA_MODE:
+            //     int mode = args.getInt(0);
+                
+            //     break;
+
+            case COMMAND_SET_CAMERA:
+                boolean running = mHVTCamera.isRunning();
+                if(running) {
+                    mHVTCamera.stopRunning();
+                }
+
+                int cameraFacing = args.getInt(0);
+
+                Size videoSize, photoSize;
+                ReadableArray dimensions;
+                if(args.isNull(1) && args.isNull(2)) {
+                    Size[] defaultSizes = mCameraHelper.getDefaultVideoAndPhotoSize(cameraFacing);
+
+                    videoSize = defaultSizes[0];
+                    photoSize = defaultSizes[1];
+                } else {
+                    if(args.isNull(1)) {
+                        dimensions = args.getArray(2);
+                        photoSize = new Size(dimensions.getInt(0), dimensions.getInt(1));
+                        List<Size> sizes = mCameraHelper.getVideoSizesForPhotoSize(cameraFacing, photoSize);
+                        videoSize = sizes.get(0);
+                    } else if(args.isNull(2)) {
+                        dimensions = args.getArray(1);
+                        videoSize = new Size(dimensions.getInt(0), dimensions.getInt(1));
+                        List<Size> sizes = mCameraHelper.getPhotoSizesForVideoSize(cameraFacing, videoSize);
+                        photoSize = sizes.get(0);
+                    } else {
+                        dimensions = args.getArray(1);
+                        videoSize = new Size(dimensions.getInt(0), dimensions.getInt(1));
+                        dimensions = args.getArray(2);
+                        photoSize = new Size(dimensions.getInt(0), dimensions.getInt(1));
+                    }
+                }
+
+                Log.i(TAG, videoSize.getWidth() + "x" + videoSize.getHeight());
+
+                mHVTCamera.setCamera(cameraFacing, videoSize, photoSize);
+
+                if(running) {
+                    mHVTCamera.startRunning();
+                }
+                break;
+
             case COMMAND_START_RECORDING:
                 if(mVideoFile == null) {
                     String filePath = args.getString(0);
@@ -151,11 +261,6 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
             MapBuilder.of("registrationName", CALLBACK_ON_SNAPSHOT_CAPTURED)
         ).build();
     }
-
-    // @ReactProp(name = "recordFile")
-    // public void setRecordFilePath(View view, String path) {
-    //     mVideoFile = new File(path);
-    // }
 
     private class CameraListener implements HVTCameraListener {
         public static final String EVENT_FAILED_TO_START = "failedToStart";
