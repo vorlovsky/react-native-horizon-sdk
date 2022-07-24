@@ -1,8 +1,5 @@
 import { NativeModules } from 'react-native';
-import { LINKING_ERROR } from './constants';
-
-export const CAMERA_FACING_BACK = 0;
-export const CAMERA_FACING_FRONT = 1;
+import { LINKING_ERROR } from './constants/error';
 
 export const HorizonSdk = NativeModules.HorizonSdk
   ? NativeModules.HorizonSdk
@@ -14,7 +11,6 @@ export const HorizonSdk = NativeModules.HorizonSdk
         },
       }
     );
-
 export const CameraHelper = NativeModules.CameraHelper
   ? NativeModules.CameraHelper
   : new Proxy(
@@ -26,4 +22,5 @@ export const CameraHelper = NativeModules.CameraHelper
       }
     );
 
+export { CameraFacing, CameraMode, ScreenRotation } from './constants';
 export { HorizonSdkView } from './components/HorizonSdkView';
