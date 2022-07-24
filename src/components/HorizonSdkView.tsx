@@ -28,7 +28,6 @@ type HorizonSdkViewProps = typeof HorizonSdkView.defaultProps & {
   tapToFocus?: boolean;
   screenRotation?: number;
   style?: ViewStyle;
-  //ref?: (ref: ComponentClass<any>) => void | ComponentClass<any> | null;
 };
 
 type SpecialProps = {
@@ -109,23 +108,23 @@ export class HorizonSdkView extends React.PureComponent<
     }
   }
 
-  startRunning() {
+  public startRunning() {
     callViewMethod(this.viewRef, 'startRunning');
   }
 
-  stopRunning() {
+  public stopRunning() {
     callViewMethod(this.viewRef, 'stopRunning');
   }
 
-  startRecording(filePath: string) {
+  public startRecording(filePath: string) {
     callViewMethod(this.viewRef, 'startRecording', filePath);
   }
 
-  stopRecording() {
+  public stopRecording() {
     callViewMethod(this.viewRef, 'stopRecording');
   }
 
-  updateCameraSetup() {
+  private updateCameraSetup() {
     const { cameraFacing, videoSize, photoSize } = this.props;
 
     callViewMethod(
@@ -137,7 +136,7 @@ export class HorizonSdkView extends React.PureComponent<
     );
   }
 
-  onRef = (ref: ComponentClass<any>) => {
+  private onRef = (ref: ComponentClass<any>) => {
     this.viewRef = ref;
 
     const { cameraFacing, videoSize, photoSize } = this.props;
