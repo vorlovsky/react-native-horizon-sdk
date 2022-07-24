@@ -6,7 +6,8 @@ import {
   HorizonSdk,
   HorizonSdkView,
   CameraHelper,
-  CAMERA_FACING_BACK,
+  CameraMode,
+  CameraFacing,
 } from 'react-native-horizon-sdk';
 
 const API_KEY =
@@ -15,22 +16,32 @@ const API_KEY =
 export default function App() {
   const [recording, setRecording] = useState(false);
   const [horizonViewRef, setHorizonViewRef] = useState(null);
+  const [videoSize, setVideoSize] = useState(null);
+  const [previewDisabled, setPreviewDisabled] = useState(false);
 
   useEffect(() => {
     const test = async () => {
       try {
-        const status = await CameraHelper.hasCamera(CAMERA_FACING_BACK);
+        const status = await CameraHelper.hasCamera(CameraFacing.BACK);
 
         console.log(status);
 
         const list = await CameraHelper.getSupportedVideoSize(
-          CAMERA_FACING_BACK
+          CameraFacing.BACK
         );
 
         console.log(list);
 
+        const size = list
+          .filter((item) => item.height > 720)
+          .sort((item1, item2) => item1.height - item2.height)[0];
+
+        console.log(size);
+
+        setVideoSize(size);
+
         const modes = await CameraHelper.getSupportedFlashModes(
-          CAMERA_FACING_BACK
+          CameraFacing.BACK
         );
 
         console.log(modes);
@@ -56,6 +67,10 @@ export default function App() {
     }
 
     setRecording(!recording);
+  };
+
+  const onTogglePreview = () => {
+    setPreviewDisabled(!previewDisabled);
   };
 
   const onFailedToStart = () => {
@@ -87,6 +102,10 @@ export default function App() {
       <HorizonSdkView
         ref={setHorizonViewRef}
         style={styles.horizon}
+        cameraMode={CameraMode.VIDEO}
+        videoSize={videoSize}
+        previewDisabled={previewDisabled}
+        screenRotation={0}
         onFailedToStart={onFailedToStart}
         onStartedRunning={onStartedRunning}
         onStoppedRunning={onStoppedRunning}
@@ -94,6 +113,11 @@ export default function App() {
         onRecordingFinished={onRecordingFinished}
       />
       <View style={styles.recStop}>
+        <Button
+          disabled={horizonViewRef == null}
+          title={previewDisabled ? 'Show Preview' : 'Hide Preview'}
+          onPress={onTogglePreview}
+        />
         <Button
           disabled={horizonViewRef == null}
           title={recording ? 'Stop' : 'Rec'}
@@ -119,6 +143,5 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 40,
   },
 });
