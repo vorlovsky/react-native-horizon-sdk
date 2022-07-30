@@ -1,6 +1,5 @@
 package com.reactnativehorizonsdk;
 
-import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.facebook.react.bridge.Promise;
@@ -14,30 +13,14 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.module.annotations.ReactModule;
 
-import com.hvt.horizonSDK.HorizonSDK;
-import com.hvt.horizonSDK.CameraHelper;
 import com.hvt.horizonSDK.Size;
+import com.reactnativehorizonsdk.helper.CameraHelperSingleton;
 
 import java.util.List;
-import java.io.IOException;
 
 @ReactModule(name = CameraHelperModule.NAME)
 public class CameraHelperModule extends ReactContextBaseJavaModule {
     public static final String NAME = "CameraHelper";
-
-    private CameraHelper mCameraHelper;
-
-    protected CameraHelper getCameraHelper() {
-        if(mCameraHelper == null) {
-            try {
-                mCameraHelper = new CameraHelper();
-            } catch (IOException e) {
-                Log.e("HorizonSDK error", "Unable to create CameraHelper instance");
-            }
-        }
-
-        return mCameraHelper;
-    }
 
     public CameraHelperModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -48,17 +31,17 @@ public class CameraHelperModule extends ReactContextBaseJavaModule {
     public String getName() {
         return NAME;
     }
-    
+
     @ReactMethod
     public void hasCamera(int cameraFacing, Promise promise) {
-        boolean status = getCameraHelper().hasCamera(cameraFacing);
+        boolean status = CameraHelperSingleton.getInstance().hasCamera(cameraFacing);
 
         promise.resolve(status);
     }
 
     @ReactMethod
     public void getSupportedVideoSize(int cameraFacing, Promise promise) {
-        List<Size> sizeList = getCameraHelper().getSupportedVideoSize(cameraFacing);
+        List<Size> sizeList = CameraHelperSingleton.getInstance().getSupportedVideoSize(cameraFacing);
 
         WritableArray array = new WritableNativeArray();
         for (Size size : sizeList) {
@@ -74,7 +57,7 @@ public class CameraHelperModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getSupportedFlashModes(int cameraFacing, Promise promise) {
-        List<String> modesList = getCameraHelper().getSupportedFlashModes(cameraFacing);
+        List<String> modesList = CameraHelperSingleton.getInstance().getSupportedFlashModes(cameraFacing);
 
         promise.resolve(Arguments.fromList(modesList));
     }
