@@ -8,14 +8,7 @@ import {
   findNodeHandle,
   View,
 } from 'react-native';
-import {
-  Permission,
-  PermissionStatus,
-  checkMultiple,
-  requestMultiple,
-  PERMISSIONS,
-  RESULTS,
-} from 'react-native-permissions';
+import { checkMultiple, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { CameraFacing, ScreenRotation } from '../constants';
 import { LINKING_ERROR } from '../constants/error';
 
@@ -65,38 +58,13 @@ export class HorizonSdkView extends React.PureComponent<
     permissionsGranted: false,
   };
 
-  async componentDidMount() {
-    let statuses: object = await checkMultiple([
-      PERMISSIONS.ANDROID.CAMERA,
-      PERMISSIONS.ANDROID.RECORD_AUDIO,
-      PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
-    ]);
-
-    const permissionsToRequest: Permission[] = Object.entries(statuses).reduce(
-      (accumulator: Permission[], item: [string, PermissionStatus]) => {
-        if (item[1] !== RESULTS.GRANTED) {
-          accumulator.push(item[0] as Permission);
-        }
-
-        return accumulator;
-      },
-      [] as Permission[]
-    );
-
-    if (permissionsToRequest.length > 0) {
-      statuses = await requestMultiple(permissionsToRequest);
-
-      if (!Object.values(statuses).every((item) => item === RESULTS.GRANTED)) {
-        console.log('All permissions need to be granted');
-
-        return;
-      }
-    }
-
-    this.setState({ permissionsGranted: true });
+  componentDidMount() {
+    this.checkPermissions();
   }
 
   componentDidUpdate(prevProps: HorizonSdkViewProps) {
+    this.checkPermissions();
+
     const { cameraFacing, videoSize, photoSize } = this.props;
 
     if (
@@ -106,6 +74,21 @@ export class HorizonSdkView extends React.PureComponent<
     ) {
       this.updateCameraSetup();
     }
+  }
+
+  async checkPermissions() {
+    let statuses: object = await checkMultiple([
+      PERMISSIONS.ANDROID.CAMERA,
+      PERMISSIONS.ANDROID.RECORD_AUDIO,
+    ]);
+
+    if (Object.values(statuses).some((item) => item !== RESULTS.GRANTED)) {
+      console.log('All permissions need to be granted');
+
+      return;
+    }
+
+    this.setState({ permissionsGranted: true });
   }
 
   public startRunning() {
