@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
-
 import { StyleSheet, View, Button } from 'react-native';
-import RNFS, { DownloadDirectoryPath } from 'react-native-fs';
+import {
+  checkMultiple,
+  requestMultiple,
+  RESULTS,
+  PERMISSIONS,
+} from 'react-native-permissions';
+import RNFS, {
+  DownloadDirectoryPath,
+  DocumentDirectoryPath,
+} from 'react-native-fs';
 import {
   HorizonSdk,
   HorizonSdkView,
@@ -10,33 +18,81 @@ import {
   CameraFacing,
 } from 'react-native-horizon-sdk';
 
-const API_KEY =
-  'm8W7J+sSoGogrwibc/TCXX/M8h9XOFozFIQ1r03zhOmpOK9Bcfde8jUrEXthYmPfHn434/WNyjfF82i0Nv5cCmNvbS5odnQucGV0cmFrZWFzLnNpbXBsZWFwcHxOT3xhbmRyb2lk';
+const targetDir = DownloadDirectoryPath;
+const recordPath = targetDir + `/${getFileName()}.mp4`;
+
+async function checkPermissions() {
+  let statuses = await checkMultiple([
+    PERMISSIONS.ANDROID.CAMERA,
+    PERMISSIONS.ANDROID.RECORD_AUDIO,
+    PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
+  ]);
+
+  const permissionsToRequest = Object.entries(statuses).reduce(
+    (accumulator, item) => {
+      if (item[1] !== RESULTS.GRANTED) {
+        accumulator.push(item[0]);
+      }
+
+      return accumulator;
+    },
+    []
+  );
+
+  if (permissionsToRequest.length > 0) {
+    statuses = await requestMultiple(permissionsToRequest);
+
+    return Object.values(statuses).every((item) => item === RESULTS.GRANTED);
+  }
+
+  return true;
+}
+
+function getFileName() {
+  const date = new Date();
+  return (
+    ('0' + date.getDate()).slice(-2) +
+    ('0' + (date.getMonth() + 1)).slice(-2) +
+    date.getFullYear() +
+    ('0' + date.getHours()).slice(-2) +
+    ('0' + date.getMinutes()).slice(-2) +
+    ('0' + date.getSeconds()).slice(-2)
+  );
+}
 
 export default function App() {
   const [recording, setRecording] = useState(false);
   const [horizonViewRef, setHorizonViewRef] = useState(null);
   const [videoSize, setVideoSize] = useState(null);
   const [previewDisabled, setPreviewDisabled] = useState(false);
+  //const [setupComplete, setSetupComplete] = useState(true);
 
   useEffect(() => {
-    const test = async () => {
+    const setup = async () => {
       try {
-        const status = await CameraHelper.hasCamera(CameraFacing.BACK);
+        let status = await checkPermissions();
 
-        console.log(status);
+        if (!status) {
+          console.log('All permissions need to be granted');
+          return;
+        }
+
+        status = await CameraHelper.hasCamera(CameraFacing.BACK);
+
+        console.log(`hasCamera ${status}`);
 
         const list = await CameraHelper.getSupportedVideoSize(
           CameraFacing.BACK
         );
 
+        console.log('getSupportedVideoSize:');
         console.log(list);
 
         const size = list
           .filter((item) => item.height > 720)
-          .sort((item1, item2) => item1.height - item2.height)[0];
+          .sort((item1, item2) => item2.height - item1.height)[0];
 
-        console.log(size);
+        console.log('VideoSize', JSON.stringify(size));
 
         setVideoSize(size);
 
@@ -44,7 +100,10 @@ export default function App() {
           CameraFacing.BACK
         );
 
+        console.log('getSupportedFlashModes:');
         console.log(modes);
+
+        //setSetupComplete(true);
       } catch (error) {
         console.log(error);
 
@@ -52,9 +111,7 @@ export default function App() {
       }
     };
 
-    test();
-
-    HorizonSdk.init(API_KEY);
+    setup();
   }, []);
 
   const onRecStop = () => {
@@ -63,7 +120,7 @@ export default function App() {
       horizonViewRef.stopRecording();
     } else {
       // @ts-ignore: Object is possibly 'null'.
-      horizonViewRef.startRecording(DownloadDirectoryPath + '/rec.mp4');
+      horizonViewRef.startRecording(recordPath);
     }
 
     setRecording(!recording);
@@ -89,11 +146,11 @@ export default function App() {
     console.log('onRecordingStarted');
   };
 
-  const onRecordingFinished = async (event) => {
+  const onRecordingFinished = async ({ nativeEvent }) => {
     console.log('onRecordingFinished');
-    console.log(event.nativeEvent);
+    console.log(nativeEvent);
 
-    const list = await RNFS.readDir(DownloadDirectoryPath);
+    const list = await RNFS.readDir(targetDir);
     list.forEach((item) => console.log(item.path, item.size));
   };
 
