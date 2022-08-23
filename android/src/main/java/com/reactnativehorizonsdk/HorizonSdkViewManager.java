@@ -377,10 +377,6 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
   public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
     return MapBuilder.<String, Object>builder()
       .put(
-        CameraListener.EVENT_FAILED_TO_START,
-        MapBuilder.of("registrationName", CALLBACK_ON_FAILED_TO_START)
-      )
-      .put(
         CameraListener.EVENT_STARTED_RUNNING,
         MapBuilder.of("registrationName", CALLBACK_ON_STARTED_RUNNING)
       )
