@@ -119,15 +119,18 @@ repositories {
       "Ensure you have you installed React Native as a dependency in your project and try again."
     )
   }
+
+  maven { url "https://jitpack.io" }
 }
 
 
 dependencies {
   //implementation fileTree(dir: "libs", include: ["*.aar"])  
   compileOnly files('libs/horizonsdk.aar')
+  implementation 'com.github.ypresto:qtfaststart-java:0.1.0'
   implementation 'com.google.guava:guava:30.1-android'
     //noinspection GradleDynamicVersion
-  implementation "com.facebook.react:react-native:+"  
+  implementation "com.facebook.react:react-native:+"
 // From node_modules
 }
 

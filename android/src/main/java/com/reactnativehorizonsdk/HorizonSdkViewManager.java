@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
 
+import net.ypresto.qtfaststart.QtFastStart;
+
 @SuppressWarnings("deprecation")
 public class HorizonSdkViewManager extends SimpleViewManager<View> {
   public static final String REACT_CLASS = "HorizonSdkView";
@@ -511,6 +513,23 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
     @Override
     public void onRecordingFinished(File file, boolean success) {
       Log.i(TAG, "onRecordingFinished " + file.getAbsolutePath() + " " + success);
+
+      /*try {
+        String fullPath = file.getAbsolutePath();
+        String path = fullPath.substring(0, fullPath.lastIndexOf("/") + 1);
+        Log.e(TAG, "path: " + path);
+        String fileName = fullPath.substring(path.length(), fullPath.length());
+        Log.e(TAG, "fileName: " + fileName);
+        File output = new File(path + "new_" + fileName);
+        output.createNewFile();
+        QtFastStart.fastStart(file, output); // Adds moov to your input
+        // Now your output file is ready to stream!
+      } catch (QtFastStart.MalformedFileException | QtFastStart.UnsupportedFileException | IOException e) {
+        Log.e("QT", e.toString());
+      }
+
+      Log.i(TAG, "File rewritten");*/
+
       WritableMap event = Arguments.createMap();
       event.putString("path", file.getAbsolutePath());
       event.putBoolean("success", success);
