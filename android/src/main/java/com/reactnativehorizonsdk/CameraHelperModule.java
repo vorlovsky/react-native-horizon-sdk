@@ -20,7 +20,7 @@ import java.util.List;
 
 @ReactModule(name = CameraHelperModule.NAME)
 public class CameraHelperModule extends ReactContextBaseJavaModule {
-    public static final String NAME = "CameraHelper";
+    public static final String NAME = "CameraHelperModule";
 
     public CameraHelperModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -55,10 +55,10 @@ public class CameraHelperModule extends ReactContextBaseJavaModule {
         promise.resolve(array);
     }
 
-    @ReactMethod
-    public void getSupportedFlashModes(int cameraFacing, Promise promise) {
-        List<String> modesList = CameraHelperSingleton.getInstance().getSupportedFlashModes(cameraFacing);
+    // @ReactMethod
+    // public void getSupportedFlashModes(int cameraFacing, Promise promise) {
+    //     List<String> modesList = CameraHelperSingleton.getInstance().getSupportedFlashModes(cameraFacing);
 
-        promise.resolve(Arguments.fromList(modesList));
-    }
+    //     promise.resolve(Arguments.fromList(modesList));
+    // }
 }

@@ -13,7 +13,7 @@ import com.hvt.horizonSDK.HorizonSDK;
 
 @ReactModule(name = HorizonSdkModule.NAME)
 public class HorizonSdkModule extends ReactContextBaseJavaModule {
-    public static final String NAME = "HorizonSdk";
+    public static final String NAME = "HorizonSdkModule";
 
     private static boolean initialized = false;
 

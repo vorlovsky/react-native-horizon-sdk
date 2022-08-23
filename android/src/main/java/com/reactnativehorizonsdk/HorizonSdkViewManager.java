@@ -51,7 +51,6 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
   private static final String COMMAND_START_RECORDING = "startRecording";
   private static final String COMMAND_STOP_RECORDING = "stopRecording";
 
-  private static final String CALLBACK_ON_FAILED_TO_START = "onFailedToStart";
   private static final String CALLBACK_ON_STARTED_RUNNING = "onStartedRunning";
   private static final String CALLBACK_ON_STOPPED_RUNNING = "onStoppedRunning";
   private static final String CALLBACK_ON_RECORDING_STARTED = "onRecordingStarted";
@@ -475,7 +474,9 @@ public class HorizonSdkViewManager extends SimpleViewManager<View> {
     @Override
     public void onFailedToStart() {
       Log.i(TAG, "onFailedToStart");
-      dispatchEvent(EVENT_FAILED_TO_START);
+      WritableMap event = Arguments.createMap();
+      event.putString("error", "failed_to_start");
+      dispatchEvent(EVENT_STOPPED_RUNNING, event);
     }
 
     @Override
