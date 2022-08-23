@@ -4,12 +4,8 @@ import {
   checkMultiple,
   requestMultiple,
   RESULTS,
-  PERMISSIONS,
 } from 'react-native-permissions';
-import RNFS, {
-  DownloadDirectoryPath,
-  DocumentDirectoryPath,
-} from 'react-native-fs';
+import RNFS, { DocumentDirectoryPath } from 'react-native-fs';
 import {
   HorizonSdk,
   HorizonSdkView,
@@ -17,16 +13,13 @@ import {
   CameraMode,
   CameraFacing,
 } from 'react-native-horizon-sdk';
+import { VideoRecordingPermissions } from './config/permissions';
 
-const targetDir = DownloadDirectoryPath;
+const targetDir = DocumentDirectoryPath;
 const recordPath = targetDir + `/${getFileName()}.mp4`;
 
 async function checkPermissions() {
-  let statuses = await checkMultiple([
-    PERMISSIONS.ANDROID.CAMERA,
-    PERMISSIONS.ANDROID.RECORD_AUDIO,
-    PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
-  ]);
+  let statuses = await checkMultiple(VideoRecordingPermissions);
 
   const permissionsToRequest = Object.entries(statuses).reduce(
     (accumulator, item) => {
@@ -90,18 +83,11 @@ export default function App() {
 
         const size = list
           .filter((item) => item.height > 720)
-          .sort((item1, item2) => item2.height - item1.height)[0];
+          .sort((item1, item2) => item1.height - item2.height)[0];
 
         console.log('VideoSize', JSON.stringify(size));
 
         setVideoSize(size);
-
-        const modes = await CameraHelper.getSupportedFlashModes(
-          CameraFacing.BACK
-        );
-
-        console.log('getSupportedFlashModes:');
-        console.log(modes);
 
         //setSetupComplete(true);
       } catch (error) {
@@ -130,16 +116,17 @@ export default function App() {
     setPreviewDisabled(!previewDisabled);
   };
 
-  const onFailedToStart = () => {
-    console.log('onFailedToStart');
-  };
-
   const onStartedRunning = () => {
     console.log('onStartedRunning');
   };
 
-  const onStoppedRunning = () => {
+  const onStoppedRunning = ({ nativeEvent }) => {
     console.log('onStoppedRunning');
+    console.log(nativeEvent);
+
+    if (nativeEvent.error) {
+      console.log('error');
+    }
   };
 
   const onRecordingStarted = () => {
@@ -149,6 +136,10 @@ export default function App() {
   const onRecordingFinished = async ({ nativeEvent }) => {
     console.log('onRecordingFinished');
     console.log(nativeEvent);
+
+    if (nativeEvent.error) {
+      console.log('error');
+    }
 
     const list = await RNFS.readDir(targetDir);
     list.forEach((item) => console.log(item.path, item.size));
@@ -163,7 +154,6 @@ export default function App() {
         videoSize={videoSize}
         previewDisabled={previewDisabled}
         screenRotation={0}
-        onFailedToStart={onFailedToStart}
         onStartedRunning={onStartedRunning}
         onStoppedRunning={onStoppedRunning}
         onRecordingStarted={onRecordingStarted}
