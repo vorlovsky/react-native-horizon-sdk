@@ -2,15 +2,14 @@ import React, { ComponentClass } from 'react';
 import {
   requireNativeComponent,
   UIManager,
-  Platform,
   ViewStyle,
-  NativeModules,
   findNodeHandle,
   View,
 } from 'react-native';
-import { checkMultiple, PERMISSIONS, RESULTS } from 'react-native-permissions';
-import { CameraFacing, ScreenRotation } from '../constants';
+import { checkMultiple, RESULTS } from 'react-native-permissions';
+import { CameraFacing, ScreenRotation, CameraMode } from '../constants';
 import { LINKING_ERROR } from '../constants/error';
+import { CameraPermissions } from '../constants/permissions';
 
 type HorizonSdkViewProps = typeof HorizonSdkView.defaultProps & {
   cameraFacing?: number;
@@ -46,7 +45,7 @@ export class HorizonSdkView extends React.PureComponent<
 > {
   static defaultProps = {
     cameraFacing: CameraFacing.BACK,
-    cameraMode: 'AUTO',
+    cameraMode: CameraMode.AUTO,
     screenRotation: ScreenRotation.ROTATION_0,
     previewDisabled: false,
     tapToFocus: false,
@@ -77,10 +76,7 @@ export class HorizonSdkView extends React.PureComponent<
   }
 
   async checkPermissions() {
-    let statuses: object = await checkMultiple([
-      PERMISSIONS.ANDROID.CAMERA,
-      PERMISSIONS.ANDROID.RECORD_AUDIO,
-    ]);
+    let statuses: object = await checkMultiple(CameraPermissions);
 
     if (Object.values(statuses).some((item) => item !== RESULTS.GRANTED)) {
       console.log('All permissions need to be granted');
@@ -151,18 +147,11 @@ function callViewMethod(
     return;
   }
 
-  if (Platform.OS === 'ios') {
-    NativeModules.HorizonSdkViewNative[methodName].apply(
-      NativeModules.HorizonSdkViewNative,
-      [findNodeHandle(viewRef), ...params]
-    );
-  } else if (Platform.OS === 'android') {
-    UIManager.dispatchViewManagerCommand(
-      findNodeHandle(viewRef),
-      methodName,
-      params
-    );
-  }
+  UIManager.dispatchViewManagerCommand(
+    findNodeHandle(viewRef),
+    methodName,
+    params
+  );
 }
 
 function normalizeSize(

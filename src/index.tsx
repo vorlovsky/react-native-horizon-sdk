@@ -1,8 +1,8 @@
 import { NativeModules } from 'react-native';
 import { LINKING_ERROR } from './constants/error';
 
-export const HorizonSdk = NativeModules.HorizonSdk
-  ? NativeModules.HorizonSdk
+export const HorizonSdk = NativeModules.HorizonSdkModule
+  ? NativeModules.HorizonSdkModule
   : new Proxy(
       {},
       {
@@ -11,8 +11,8 @@ export const HorizonSdk = NativeModules.HorizonSdk
         },
       }
     );
-export const CameraHelper = NativeModules.CameraHelper
-  ? NativeModules.CameraHelper
+export const CameraHelper = NativeModules.CameraHelperModule
+  ? NativeModules.CameraHelperModule
   : new Proxy(
       {},
       {
