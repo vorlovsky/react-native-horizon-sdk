@@ -64,4 +64,3 @@ android/keystores/debug.keystore
 lib/
 /.history/
 /example/vendor/
-/android/gradle/
