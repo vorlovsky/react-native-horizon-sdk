@@ -6,12 +6,11 @@ import {
   findNodeHandle,
   View,
 } from 'react-native';
-import { checkMultiple, RESULTS } from 'react-native-permissions';
 import { CameraFacing, ScreenRotation, CameraMode } from '../constants';
 import { LINKING_ERROR } from '../constants/error';
-import { CameraPermissions } from '../constants/permissions';
 
 type HorizonSdkViewProps = typeof HorizonSdkView.defaultProps & {
+  permissionsGranted?: boolean;
   cameraFacing?: number;
   videoSize?: { width: number; height: number } | null;
   photoSize?: { width: number; height: number } | null;
@@ -26,10 +25,6 @@ type SpecialProps = {
   ref?: (ref: ComponentClass<any>) => void | ComponentClass<any> | null;
 };
 
-type HorizonSdkViewState = {
-  permissionsGranted: boolean;
-};
-
 const ComponentName = 'HorizonSdkView';
 
 const HorizonSdkViewNative =
@@ -39,11 +34,9 @@ const HorizonSdkViewNative =
         throw new Error(LINKING_ERROR);
       };
 
-export class HorizonSdkView extends React.PureComponent<
-  HorizonSdkViewProps,
-  HorizonSdkViewState
-> {
+export class HorizonSdkView extends React.PureComponent<HorizonSdkViewProps> {
   static defaultProps = {
+    permissionsGranted: true,
     cameraFacing: CameraFacing.BACK,
     cameraMode: CameraMode.AUTO,
     screenRotation: ScreenRotation.ROTATION_0,
@@ -53,17 +46,7 @@ export class HorizonSdkView extends React.PureComponent<
 
   private viewRef: ComponentClass<any> | null = null;
 
-  public state: HorizonSdkViewState = {
-    permissionsGranted: false,
-  };
-
-  componentDidMount() {
-    this.checkPermissions();
-  }
-
   componentDidUpdate(prevProps: HorizonSdkViewProps) {
-    this.checkPermissions();
-
     const { cameraFacing, videoSize, photoSize } = this.props;
 
     if (
@@ -73,18 +56,6 @@ export class HorizonSdkView extends React.PureComponent<
     ) {
       this.updateCameraSetup();
     }
-  }
-
-  async checkPermissions() {
-    let statuses: object = await checkMultiple(CameraPermissions);
-
-    if (Object.values(statuses).some((item) => item !== RESULTS.GRANTED)) {
-      console.log('All permissions need to be granted');
-
-      return;
-    }
-
-    this.setState({ permissionsGranted: true });
   }
 
   public startRunning() {
@@ -128,7 +99,7 @@ export class HorizonSdkView extends React.PureComponent<
   };
 
   render() {
-    const { permissionsGranted } = this.state;
+    const { permissionsGranted } = this.props;
 
     return permissionsGranted ? (
       <HorizonSdkViewNative {...this.props} ref={this.onRef} />

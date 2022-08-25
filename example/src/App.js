@@ -58,7 +58,7 @@ export default function App() {
   const [horizonViewRef, setHorizonViewRef] = useState(null);
   const [videoSize, setVideoSize] = useState(null);
   const [previewDisabled, setPreviewDisabled] = useState(false);
-  //const [setupComplete, setSetupComplete] = useState(true);
+  const [permissionsGranted, setPermissionsGranted] = useState(false);
 
   useEffect(() => {
     const setup = async () => {
@@ -89,7 +89,7 @@ export default function App() {
 
         setVideoSize(size);
 
-        //setSetupComplete(true);
+        setPermissionsGranted(true);
       } catch (error) {
         console.log(error);
 
@@ -149,6 +149,7 @@ export default function App() {
     <View style={styles.container}>
       <HorizonSdkView
         ref={setHorizonViewRef}
+        permissionsGranted={permissionsGranted}
         style={styles.horizon}
         cameraMode={CameraMode.VIDEO}
         videoSize={videoSize}
