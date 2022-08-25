@@ -10,6 +10,7 @@
 
 @property (nonatomic) HVTCamera *camera;
 @property (nonatomic) NSMutableArray *previews;
+@property (nonatomic) NSString *recordingPath;
 
 @end
 
@@ -53,30 +54,26 @@ RCT_EXPORT_VIEW_PROPERTY(onRecordingFinished, RCTDirectEventBlock)
 }
 
 RCT_EXPORT_METHOD(startRunning:(nonnull NSNumber*)reactTag) {
-  [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
-    [self.camera startRunning];
-  }];
+  [self.camera startRunning];
 }
 
 RCT_EXPORT_METHOD(stopRunning:(nonnull NSNumber*)reactTag) {
-  [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
-    [self.camera stopRunning];
+  [self.camera stopRunning];
 
-    for (HVTViewWrapper *preview in self.previews) {
-      if (!preview.onStoppedRunning) {
-        return;
-      }
-
-      preview.onStoppedRunning(@{});
+  for (HVTViewWrapper *preview in self.previews) {
+    if (!preview.onStoppedRunning) {
+      return;
     }
-  }];
+
+    preview.onStoppedRunning(@{});
+  }
 }
 
 RCT_EXPORT_METHOD(setCamera:(nonnull NSNumber*)reactTag 
               facingTowards:(nonnull NSNumber*)cameraFacing 
               withVideoSize:(nullable NSArray*)videoSize 
               withPhotoSize:(nullable NSArray*)photoSize) {
-    [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
+    // [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
         // HVTViewWrapper *view = (HVTViewWrapper *)viewRegistry[reactTag];
         // if (!view) {
         //     RCTLogError(@"Cannot find NativeView with tag #%@", reactTag);
@@ -103,22 +100,24 @@ RCT_EXPORT_METHOD(setCamera:(nonnull NSNumber*)reactTag
             NSLog(@"%@",[error localizedDescription]);
           }
         }
-    }];
+    // }];
 }
 
 RCT_EXPORT_METHOD(startRecording:(nonnull NSNumber*)reactTag 
                       targetPath:(NSString*)path) {
-  [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
-    NSURL *url = [NSURL fileURLWithPath:path];
+  if(self.camera.isRecording) {
+    return;
+  }
+  
+  self.recordingPath = path;
 
-    [self.camera startRecordingWithMovieURL:url];
-  }];
+  NSURL *url = [NSURL fileURLWithPath:path];
+
+  [self.camera startRecordingWithMovieURL:url];
 }
 
 RCT_EXPORT_METHOD(stopRecording:(nonnull NSNumber*)reactTag) {
-  [self.bridge.uiManager addUIBlock:^(RCTUIManager *uiManager, NSDictionary<NSNumber *,UIView *> *viewRegistry) {
-    [self.camera stopRecording];
-  }];
+  [self.camera stopRecording];
 }
 
 RCT_CUSTOM_VIEW_PROPERTY(cameraMode, NSString, HVTViewWrapper)
@@ -207,7 +206,7 @@ RCT_CUSTOM_VIEW_PROPERTY(tapToFocus, NSNumber, HVTViewWrapper)
       return;
     }
 
-    preview.onRecordingFinished(@{@"error":error});
+    preview.onRecordingFinished(@{@"path": self.recordingPath, @"success": @NO});
   }
 }
 
@@ -217,7 +216,7 @@ RCT_CUSTOM_VIEW_PROPERTY(tapToFocus, NSNumber, HVTViewWrapper)
       return;
     }
 
-    preview.onRecordingFinished(metadata);
+    preview.onRecordingFinished(@{@"path": self.recordingPath, @"success": @YES});
   }
 }
 
