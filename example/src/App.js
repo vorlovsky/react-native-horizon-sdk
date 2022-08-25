@@ -70,6 +70,8 @@ export default function App() {
           return;
         }
 
+        setPermissionsGranted(true);
+
         status = await CameraHelper.hasCamera(CameraFacing.BACK);
 
         console.log(`hasCamera ${status}`);
@@ -88,8 +90,6 @@ export default function App() {
         console.log('VideoSize', JSON.stringify(size));
 
         setVideoSize(size);
-
-        setPermissionsGranted(true);
       } catch (error) {
         console.log(error);
 
@@ -108,8 +108,6 @@ export default function App() {
       // @ts-ignore: Object is possibly 'null'.
       horizonViewRef.startRecording(recordPath);
     }
-
-    setRecording(!recording);
   };
 
   const onTogglePreview = () => {
@@ -118,6 +116,8 @@ export default function App() {
 
   const onStartedRunning = () => {
     console.log('onStartedRunning');
+
+    setTimeout(() => horizonViewRef.startRecording(recordPath), 100);
   };
 
   const onStoppedRunning = ({ nativeEvent }) => {
@@ -131,11 +131,15 @@ export default function App() {
 
   const onRecordingStarted = () => {
     console.log('onRecordingStarted');
+
+    setRecording(true);
   };
 
   const onRecordingFinished = async ({ nativeEvent }) => {
     console.log('onRecordingFinished');
     console.log(nativeEvent);
+
+    setRecording(false);
 
     if (nativeEvent.error) {
       console.log('error');

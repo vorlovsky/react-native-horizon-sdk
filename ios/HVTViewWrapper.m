@@ -6,7 +6,7 @@
 - (void) willMoveToSuperview: (UIView *) newSuperview
 {
   if(newSuperview == nil) {
-    [self.delegate willBeRemoved:self];
+    [delegate willBeRemoved:self];
   }
 }
 

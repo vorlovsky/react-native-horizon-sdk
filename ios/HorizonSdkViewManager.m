@@ -162,10 +162,9 @@ RCT_CUSTOM_VIEW_PROPERTY(tapToFocus, NSNumber, HVTViewWrapper)
 #pragma mark - HVTViewWrapperDelegate
 
 - (void)willBeRemoved:(HVTViewWrapper *)preview {
-  RCTLogInfo(@"PREVIEW REMOVED");
-  [self.previews removeObject:preview];
-  [self.camera removeView: preview];
   preview.delegate = nil;
+  [self.previews removeObject:preview];
+  [self.camera removeView: preview];  
 }
 
 #pragma mark - HVTCameraDelegate
