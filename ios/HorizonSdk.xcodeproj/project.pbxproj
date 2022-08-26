@@ -37,6 +37,7 @@
 		8421550428B3CB23008A6EF6 /* CameraHelperModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraHelperModule.m; sourceTree = "<group>"; };
 		8421550528B3CB23008A6EF6 /* HVTViewWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HVTViewWrapper.m; sourceTree = "<group>"; };
 		8421550628B3CB23008A6EF6 /* HorizonSDKModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HorizonSDKModule.h; sourceTree = "<group>"; };
+		84B09B3E28B8A5DF004D8D4C /* HorizonSdkViewManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HorizonSdkViewManager.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +62,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				84B09B3E28B8A5DF004D8D4C /* HorizonSdkViewManager.h */,
 				842154FF28B3CB23008A6EF6 /* CameraHelper.h */,
 				842154FE28B3CB23008A6EF6 /* CameraHelper.m */,
 				8421550328B3CB23008A6EF6 /* CameraHelperModule.h */,
@@ -131,9 +133,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8421550928B3CB23008A6EF6 /* HorizonSdkViewManager.m in Sources */,
 				8421550B28B3CB23008A6EF6 /* HVTViewWrapper.m in Sources */,
 				8421550828B3CB23008A6EF6 /* HorizonSDKModule.m in Sources */,
-				8421550928B3CB23008A6EF6 /* HorizonSdkViewManager.m in Sources */,
 				8421550A28B3CB23008A6EF6 /* CameraHelperModule.m in Sources */,
 				8421550728B3CB23008A6EF6 /* CameraHelper.m in Sources */,
 			);

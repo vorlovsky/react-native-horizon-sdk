@@ -1,18 +1,11 @@
 #import <React/RCTViewManager.h>
 #import <React/RCTUIManager.h>
 #import <React/RCTLog.h>
+#import "HorizonSdkViewManager.h"
 #import "HVTViewWrapper.h"
 #import "CameraHelper.h"
 
 @import HorizonSDK;
-
-@interface HorizonSdkViewManager : RCTViewManager <HVTCameraDelegate, HVTViewWrapperDelegate>
-
-@property (nonatomic) HVTCamera *camera;
-@property (nonatomic) NSMutableArray *previews;
-@property (nonatomic) NSString *recordingPath;
-
-@end
 
 @implementation HorizonSdkViewManager
 
@@ -41,7 +34,7 @@ RCT_EXPORT_VIEW_PROPERTY(onRecordingFinished, RCTDirectEventBlock)
   }
 
   HVTViewWrapper *preview = [[HVTViewWrapper alloc] initWithFrame:CGRectZero];
-  preview.delegate = self;
+  preview.viewManager = self;
   
   [self.camera addView: preview];
 
@@ -159,12 +152,12 @@ RCT_CUSTOM_VIEW_PROPERTY(tapToFocus, NSNumber, HVTViewWrapper)
 //   return [UIColor colorWithRed:r / 255.0f green:g / 255.0f blue:b / 255.0f alpha:1.0f];
 // }
 
-#pragma mark - HVTViewWrapperDelegate
+#pragma mark - HVTViewWrapper callback
 
-- (void)willBeRemoved:(HVTViewWrapper *)preview {
-  preview.delegate = nil;
-  [self.previews removeObject:preview];
-  [self.camera removeView: preview];  
+- (void)viewWillBeRemoved:(HVTView *)view {
+  ((HVTViewWrapper *)view).viewManager = nil;
+  [self.previews removeObject:view];
+  [self.camera removeView:view];
 }
 
 #pragma mark - HVTCameraDelegate
